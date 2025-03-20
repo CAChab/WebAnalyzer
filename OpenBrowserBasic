@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""
+firefox_base.py - Grundlegende Funktionen zum Starten von Firefox im privaten Modus
+
+Dieses Skript bietet Basisfunktionen zum Starten von Firefox im privaten Modus
+und kann als Grundlage für weitere Automatisierungen dienen.
+
+Voraussetzungen:
+- Python 3.x
+- subprocess-Modul (Standard in Python)
+"""
+
+import subprocess
+import platform
+import os
+import time
+import sys
+
+
+def get_firefox_path():
+    """Ermittelt den Pfad zur Firefox-Executable basierend auf dem Betriebssystem."""
+    system = platform.system()
+
+    if system == "Windows":
+        # Typische Installationspfade auf Windows
+        paths = [
+            r"C:\Program Files\Mozilla Firefox\firefox.exe",
+            r"C:\Program Files (x86)\Mozilla Firefox\firefox.exe",
+        ]
+        for path in paths:
+            if os.path.exists(path):
+                return path
+
+    elif system == "Darwin":  # macOS
+        return "/Applications/Firefox.app/Contents/MacOS/firefox"
+
+    elif system == "Linux":
+        # Überprüfen der üblichen Pfade auf Linux
+        paths = [
+            "/usr/bin/firefox",
+            "/usr/lib/firefox/firefox",
+            "/snap/bin/firefox"
+        ]
+        for path in paths:
+            if os.path.exists(path):
+                return path
+
+    return None  # Pfad nicht gefunden
+
+
+def open_firefox_private():
+    """Startet Firefox im privaten Modus."""
+    firefox_path = get_firefox_path()
+
+    if not firefox_path:
+        print("Firefox konnte nicht gefunden werden. Bitte installiere Firefox oder gib den Pfad manuell an.")
+        return False
+
+    try:
+        # -private Flag für privaten Modus
+        subprocess.Popen([firefox_path, "-private"])
+        print("Firefox wurde im privaten Modus gestartet.")
+        return True
+    except Exception as e:
+        print(f"Fehler beim Starten von Firefox: {e}")
+        return False
+
+
+def open_firefox_with_urls(urls, private=True):
+    """
+    Startet Firefox mit einer Liste von URLs.
+
+    Args:
+        urls (list): Liste von URLs, die geöffnet werden sollen
+        private (bool): Wenn True, wird Firefox im privaten Modus gestartet
+    """
+    firefox_path = get_firefox_path()
+
+    if not firefox_path:
+        print("Firefox konnte nicht gefunden werden. Bitte installiere Firefox oder gib den Pfad manuell an.")
+        return False
+
+    try:
+        cmd = [firefox_path]
+
+        # Privaten Modus hinzufügen, wenn gewünscht
+        if private:
+            cmd.append("-private")
+
+        # URLs hinzufügen
+        cmd.extend(urls)
+
+        subprocess.Popen(cmd)
+        print(f"Firefox wurde mit {len(urls)} Tab(s) gestartet.")
+        return True
+    except Exception as e:
+        print(f"Fehler beim Starten von Firefox: {e}")
+        return False
+
+
+if __name__ == "__main__":
+    # Beispielverwendung
+    print("Firefox Base - Starter Skript")
+    print("1. Firefox im privaten Modus starten")
+    print("2. Firefox im privaten Modus mit Beispiel-URLs starten")
+    print("0. Beenden")
+
+    choice = input("Bitte wähle eine Option: ")
+
+    if choice == "1":
+        open_firefox_private()
+    elif choice == "2":
+        example_urls = [
+            "https://ebay.de",
+            "https://www.github.com",
+            "https://www.mozilla.org"
+        ]
+        open_firefox_with_urls(example_urls)
+    else:
+        print("Programm beendet.")
